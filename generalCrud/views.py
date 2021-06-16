@@ -7,6 +7,7 @@ import json
 from .models import User
 from .models import Task
 from .models import Event
+from datetime import datetime
 
 
 # Create your views here.
@@ -35,20 +36,17 @@ class UserView(View):
             finalData = json.loads(serialize("json", [user]))
         return JsonResponse(finalData, safe=False)
 
-    def put(self, request):
-        return JsonResponse({"hello": "world", "method": request.method})
-
-    def delete(self, request):
-        return JsonResponse({"hello": "world", "method": request.method})
-
-class SecondView(View):
+class TaskView(View):
     def get(self, request, param):
         query = request.GET.get("query", "no query")
         return JsonResponse({"param": param, "query": query})
         
-    def post(self, request, param):
-        query = request.GET.get("query", "no query")
-        return JsonResponse({"param": param, "query": query})
+    def post(self, request):
+        body = GetBody(request)
+        print(datetime.strptime(body["dueDate"], '%Y-%m-%d').date())
+        task = Task.objects.create(name=body["name"], taskCycle=body["taskCycle"], dueDate=datetime.strptime(body["dueDate"], '%Y-%m-%d').date(), userId=User.objects.get(email__exact=body["email"]))
+        finalData = json.loads(serialize("json", [task]))
+        return JsonResponse(finalData, safe=False)
 
     def put(self, request, param):
         query = request.GET.get("query", "no query")

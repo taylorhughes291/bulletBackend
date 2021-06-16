@@ -15,11 +15,10 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
-from generalCrud.views import UserView, SecondView, ThirdView
+from generalCrud.views import UserView, TaskView, ThirdView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('user/', UserView.as_view()),
-    path('second/<param>/', SecondView.as_view()),
-    path('third/', ThirdView.as_view())
+    path('task/', TaskView.as_view())
 ]
