@@ -75,7 +75,7 @@ class EventView(View):
         return JsonResponse({"status": 200, "msg": "event deleted"})
 
 class UserViewGet(View):
-    def get(self, request):
+    def get(self, request, id):
         tasks = Task.objects.filter(userId__exact=id)
         events = Event.objects.filter(userId__exact=id)
         serialTasks = json.loads(serialize("json", tasks))
