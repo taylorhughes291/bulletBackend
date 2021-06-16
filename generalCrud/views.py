@@ -61,6 +61,12 @@ class TaskView(View):
         task.delete()
         return JsonResponse({"status": 200, "msg": "task deleted"})
 
+    def put(self, request):
+        body = GetBody(request)
+        id = request.GET.get('id', '')
+        Task.objects.filter(id=id).update(**body)
+        return JsonResponse({"status": 200, "msg": "task updated"})
+
 class EventView(View):
     def post(self, request):
         body = GetBody(request)
@@ -73,6 +79,12 @@ class EventView(View):
         event = Event.objects.get(id=id)
         event.delete()
         return JsonResponse({"status": 200, "msg": "event deleted"})
+
+    def put(self, request):
+        body = GetBody(request)
+        id = request.GET.get('id', '')
+        Event.objects.filter(id=id).update(**body)
+        return JsonResponse({"status": 200, "msg": "event updated"})
 
 class UserViewGet(View):
     def get(self, request, id):
