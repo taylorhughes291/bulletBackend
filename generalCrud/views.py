@@ -66,7 +66,8 @@ class TaskView(View):
         id = request.GET.get('id', '')
         Task.objects.filter(id=id).update(**body)
         newTasks = Task.objects.filter(userId__exact=id)
-        finalData = json.loads(serialize("json", [newTasks]))
+        print(newTasks)
+        finalData = json.loads(serialize("json", newTasks))
         return JsonResponse(finalData, safe=False)
 
 class EventView(View):
