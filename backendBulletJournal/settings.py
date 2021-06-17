@@ -132,7 +132,7 @@ django_heroku.settings(locals())
 # ALLOWED_HOSTS=['http://localhost:8000', 'http://localhost:3000', 'https://bullet-journal-frontend.vercel.app/']
 ALLOWED_HOSTS=['*']
 
-CORS_ORIGIN_ALLOW_ALL = True
+CORS_ALLOW_ALL_ORIGINS = True
 # CORS_ORIGIN_WHITELIST = (
 #     'http://localhost:8000',
 #     'http://localhost:3000',
