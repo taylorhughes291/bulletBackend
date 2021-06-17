@@ -64,8 +64,9 @@ class TaskView(View):
     def put(self, request):
         body = GetBody(request)
         id = request.GET.get('id', '')
+        user = request.GET.get('user', '')
         Task.objects.filter(id=id).update(**body)
-        newTasks = Task.objects.filter(userId__exact=id)
+        newTasks = Task.objects.filter(userId__exact=user)
         print(newTasks)
         finalData = json.loads(serialize("json", newTasks))
         return JsonResponse(finalData, safe=False)
