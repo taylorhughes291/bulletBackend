@@ -57,9 +57,12 @@ class TaskView(View):
 
     def delete(self, request):
         id = request.GET.get('id', '')
+        user = request.GET.get('user', '')
         task = Task.objects.get(id=id)
         task.delete()
-        return JsonResponse({"status": 200, "msg": "task deleted"})
+        newTasks = Task.objects.filter(userId__exact=user)
+        finalData = json.loads(serialize("json", newTasks))
+        return JsonResponse(finalData, safe=False)
 
     def put(self, request):
         body = GetBody(request)
