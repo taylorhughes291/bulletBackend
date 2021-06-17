@@ -67,7 +67,6 @@ class TaskView(View):
         user = request.GET.get('user', '')
         Task.objects.filter(id=id).update(**body)
         newTasks = Task.objects.filter(userId__exact=user)
-        print(newTasks)
         finalData = json.loads(serialize("json", newTasks))
         return JsonResponse(finalData, safe=False)
 
@@ -87,8 +86,12 @@ class EventView(View):
     def put(self, request):
         body = GetBody(request)
         id = request.GET.get('id', '')
+        user = request.GET.get('user', '')
         Event.objects.filter(id=id).update(**body)
-        return JsonResponse({"status": 200, "msg": "event updated"})
+        newEvents = Event.objects.filter(userId__exact=user)
+        finalData = json.loads(serialize("json", newEvents))
+        print(finalData)
+        return JsonResponse(finalData, safe=False)
 
 class UserViewGet(View):
     def get(self, request, id):
