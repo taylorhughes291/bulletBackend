@@ -18,7 +18,8 @@ class UserView(View):
         user = User.objects.filter(email__exact=email)
         if user.exists():
             if user.values_list('password', flat=True)[0] == password:
-                finalData = {"status": 200, "email": email}
+                userId = user.values('pk')[0]['pk']
+                finalData = {"status": 200, "userId": userId}
             else:
                 finalData = {"status": 403, "msg": "You have entered an incorrect password."} 
         else:
