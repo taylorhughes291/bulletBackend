@@ -81,10 +81,14 @@ class EventView(View):
         finalData = json.loads(serialize("json", [event]))
         return JsonResponse(finalData, safe=False)
 
-    def delete(self, request, id):
+    def delete(self, request):
+        id = request.GET.get('id', '')
+        user = request.GET.get('user', '')
         event = Event.objects.get(id=id)
         event.delete()
-        return JsonResponse({"status": 200, "msg": "event deleted"})
+        newEvents = Event.objects.filter(userId__exact=user)
+        finalData = json.loads(serialize("json", newEvents))
+        return JsonResponse(finalData, safe=False)
 
     def put(self, request):
         body = GetBody(request)
