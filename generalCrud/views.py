@@ -34,7 +34,7 @@ class UserView(View):
             finalData = {"status": 403, "msg": "This user already exists"}
         else:
             user = User.objects.create(name=body["name"], email=body["email"], phone=body["phone"], password=body["password"])
-            finalData = json.loads(serialize("json", [user]))
+            finalData = {"status": 200, "data": json.loads(serialize("json", [user]))}
         return JsonResponse(finalData, safe=False)
     
     def delete(self, request):
