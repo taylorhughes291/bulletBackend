@@ -52,7 +52,7 @@ class UserView(View):
 class TaskView(View):
     def post(self, request):
         body = GetBody(request)
-        task = Task.objects.create(name=body["name"], taskCycle=body["taskCycle"], dueDate=datetime.datetime.strptime(body["dueDate"], '%Y-%m-%d').date(), userId=User.objects.get(email__exact=body["email"]))
+        task = Task.objects.create(name=body["name"], taskCycle=body["taskCycle"], dueDate=datetime.datetime.strptime(body["dueDate"], '%Y-%m-%d').date(), userId=User.objects.get(id__exact=body["userId"]))
         finalData = json.loads(serialize("json", [task]))
         return JsonResponse(finalData, safe=False)
 
