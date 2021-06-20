@@ -78,7 +78,7 @@ class EventView(View):
     def post(self, request):
         body = GetBody(request)
         print(datetime.strptime(body["startDate"], '%Y-%m-%d %H:%M'))
-        event = Event.objects.create(name=body["name"], startDate=datetime.strptime(body["startDate"], '%Y-%m-%d %H:%M'), endDate=datetime.strptime(body["endDate"], '%Y-%m-%d %H:%M'), userId=User.objects.get(email__exact=body["email"]), isCalendarHeadline=body["isCalendarHeadline"])
+        event = Event.objects.create(name=body["name"], startDate=datetime.strptime(body["startDate"], '%Y-%m-%d %H:%M'), endDate=datetime.strptime(body["endDate"], '%Y-%m-%d %H:%M'), userId=User.objects.get(id__exact=body["userId"]), isCalendarHeadline=body["isCalendarHeadline"])
         finalData = json.loads(serialize("json", [event]))
         return JsonResponse(finalData, safe=False)
 
