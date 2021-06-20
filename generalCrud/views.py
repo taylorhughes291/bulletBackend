@@ -7,7 +7,7 @@ import json
 from .models import User
 from .models import Task
 from .models import Event
-from datetime import datetime
+import datetime
 
 
 # Create your views here.
@@ -52,7 +52,7 @@ class UserView(View):
 class TaskView(View):
     def post(self, request):
         body = GetBody(request)
-        task = Task.objects.create(name=body["name"], taskCycle=body["taskCycle"], dueDate=datetime.strptime(body["dueDate"], '%Y-%m-%d').date(), userId=User.objects.get(email__exact=body["email"]))
+        task = Task.objects.create(name=body["name"], taskCycle=body["taskCycle"], dueDate=datetime.datetime.strptime(body["dueDate"], '%Y-%m-%d').date(), userId=User.objects.get(email__exact=body["email"]))
         finalData = json.loads(serialize("json", [task]))
         return JsonResponse(finalData, safe=False)
 
@@ -77,9 +77,30 @@ class TaskView(View):
 class EventView(View):
     def post(self, request):
         body = GetBody(request)
-        print(datetime.strptime(body["startDate"], '%Y-%m-%d %H:%M'))
-        event = Event.objects.create(name=body["name"], startDate=datetime.strptime(body["startDate"], '%Y-%m-%d %H:%M'), endDate=datetime.strptime(body["endDate"], '%Y-%m-%d %H:%M'), userId=User.objects.get(id__exact=body["userId"]), isCalendarHeadline=body["isCalendarHeadline"])
-        finalData = json.loads(serialize("json", [event]))
+        startDate = datetime.datetime.strptime(body["startDate"], '%Y-%m-%d %H:%M').date()
+        endDate = datetime.datetime.strptime(body["endDate"], '%Y-%m-%d %H:%M').date()
+        endTime = datetime.time(23,59,59)
+        startTime = datetime.time(0,0,0)
+        event = Event.objects.create(name=body["name"], startDate=datetime.datetime.strptime(body["startDate"], '%Y-%m-%d %H:%M'), endDate=datetime.datetime.strptime(body["endDate"], '%Y-%m-%d %H:%M'), userId=User.objects.get(id__exact=body["userId"]), dateClass="month")
+        for i in range((endDate - startDate).days + 1):
+            if i == 0:
+                if (endDate-startDate).days == 0:
+                    Event.objects.create(name=body["name"], startDate=datetime.datetime.strptime(body["startDate"], '%Y-%m-%d %H:%M'), endDate=datetime.datetime.strptime(body["endDate"], '%Y-%m-%d %H:%M'), userId=User.objects.get(id__exact=body["userId"]), dateClass="day", master=event)
+                else:
+                    endOfStartDate = datetime.datetime.combine(startDate, endTime)
+                    Event.objects.create(name=body["name"], startDate=datetime.datetime.strptime(body["startDate"], '%Y-%m-%d %H:%M'), endDate=endOfStartDate, userId=User.objects.get(id__exact=body["userId"]), dateClass="day", master=event)
+            elif i == (endDate-startDate).days:
+                startOfEndDate = datetime.datetime.combine(endDate, startTime)
+                Event.objects.create(name=body["name"], startDate=startOfEndDate, endDate=datetime.datetime.strptime(body["endDate"], '%Y-%m-%d %H:%M'), userId=User.objects.get(id__exact=body["userId"]), dateClass="day", master=event)
+            else:
+                endOfStartDate = datetime.datetime.combine(startDate, endTime)
+                startOfEndDate = datetime.datetime.combine(endDate, startTime)
+                Event.objects.create(name=body["name"], startDate=startOfEndDate, endDate=endOfStartDate, userId=User.objects.get(id__exact=body["userId"]), dateClass="day", master=event)
+        
+        dayEvents = Event.objects.filter(master=event)
+        finalEvent = json.loads(serialize("json", [event]))
+        finalEvents = json.loads(serialize("json", dayEvents))
+        finalData = {"monthEvent": finalEvent, "dayEvents": finalEvents}
         return JsonResponse(finalData, safe=False)
 
     def delete(self, request):

@@ -20,4 +20,5 @@ class Event(models.Model):
     startDate = models.DateTimeField()
     endDate = models.DateTimeField()
     userId = models.ForeignKey(to='User', on_delete=models.PROTECT)
-    isCalendarHeadline = models.BooleanField(default=False)
+    dateClass = models.CharField(max_length=20)
+    master = models.ForeignKey(to='Event', on_delete=models.PROTECT, null=True)
