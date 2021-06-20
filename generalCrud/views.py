@@ -93,8 +93,9 @@ class EventView(View):
                 startOfEndDate = datetime.datetime.combine(endDate, startTime)
                 Event.objects.create(name=body["name"], startDate=startOfEndDate, endDate=datetime.datetime.strptime(body["endDate"], '%Y-%m-%d %H:%M'), userId=User.objects.get(id__exact=body["userId"]), dateClass="day", master=event)
             else:
-                endOfStartDate = datetime.datetime.combine(startDate, endTime)
-                startOfEndDate = datetime.datetime.combine(endDate, startTime)
+                day = startDate + datetime.timedelta(days=i)
+                endOfStartDate = datetime.datetime.combine(day, endTime)
+                startOfEndDate = datetime.datetime.combine(day, startTime)
                 Event.objects.create(name=body["name"], startDate=startOfEndDate, endDate=endOfStartDate, userId=User.objects.get(id__exact=body["userId"]), dateClass="day", master=event)
         
         dayEvents = Event.objects.filter(master=event)
