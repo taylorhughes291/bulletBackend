@@ -52,7 +52,7 @@ class UserView(View):
 class TaskView(View):
     def post(self, request):
         body = GetBody(request)
-        task = Task.objects.create(name=body["name"], taskCycle=body["taskCycle"], dueDate=datetime.datetime.strptime(body["dueDate"], '%Y-%m-%d').date(), userId=User.objects.get(id__exact=body["userId"]))
+        task = Task.objects.create(name=body["name"], taskCycle=body["taskCycle"], dueDate=datetime.datetime.strptime(body["dueDate"], '%Y-%m-%d').date(), originalDate=datetime.datetime.strptime(body["dueDate"], '%Y-%m-%d').date(), userId=User.objects.get(id__exact=body["userId"]))
         finalData = json.loads(serialize("json", [task]))
         return JsonResponse(finalData, safe=False)
 
@@ -130,4 +130,14 @@ class UserViewGet(View):
         serialTasks = json.loads(serialize("json", tasks))
         serialEvents = json.loads(serialize("json", events))
         data = {"tasks": serialTasks, "events": serialEvents}
+        return JsonResponse(data, safe=False)
+
+class SchedulerView(View):
+    def get(self, request):
+        today = datetime.datetime.today()
+        tomorrow = today + datetime.timedelta(days=1)
+        Task.objects.filter(dueDate=today.strftime('%Y-%m-%d')).update(dueDate=tomorrow.strftime('%Y-%m-%d'))
+        tasks = Task.objects.filter(dueDate=tomorrow.strftime('%Y-%m-%d'))
+        serialTasks = json.loads(serialize("json", tasks))
+        data = {"tasks": serialTasks}
         return JsonResponse(data, safe=False)

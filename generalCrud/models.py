@@ -14,6 +14,7 @@ class Task(models.Model):
     taskCycle = models.JSONField()
     dueDate = models.DateField(null=True)
     userId = models.ForeignKey(to='User', on_delete=models.PROTECT)
+    originalDate = models.DateField(null=True)
 
 class Event(models.Model):
     name = models.CharField(max_length=100)
