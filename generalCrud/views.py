@@ -136,8 +136,4 @@ class SchedulerView(View):
     def get(self, request):
         today = datetime.datetime.today()
         tomorrow = today + datetime.timedelta(days=1)
-        Task.objects.filter(dueDate=today.strftime('%Y-%m-%d')).update(dueDate=tomorrow.strftime('%Y-%m-%d'))
-        tasks = Task.objects.filter(dueDate=tomorrow.strftime('%Y-%m-%d'))
-        serialTasks = json.loads(serialize("json", tasks))
-        data = {"tasks": serialTasks}
-        return JsonResponse(data, safe=False)
+        Task.objects.filter(dueDate=today.strftime('%Y-%m-%d'), isComplete=False, taskCycle__day=True).update(dueDate=tomorrow.strftime('%Y-%m-%d'))
