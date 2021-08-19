@@ -1,3 +1,4 @@
+from backendBulletJournal.settings import SECRET_KEY
 from django.shortcuts import render
 from django.http import JsonResponse
 from django.views import View
@@ -8,6 +9,13 @@ from .models import User
 from .models import Task
 from .models import Event
 import datetime
+import jwt
+
+# Auth Check
+def authCheck (token):
+    accessToken = token.split()[1]
+    print(accessToken)
+    decoded = jwt.decode(accessToken, SECRET_KEY, algorithms="HS256")
 
 
 # Create your views here.
@@ -19,7 +27,8 @@ class UserView(View):
         if user.exists():
             if user.values_list('password', flat=True)[0] == password:
                 userId = user.values('pk')[0]['pk']
-                finalData = {"status": 200, "userId": userId}
+                encoded_jwt = jwt.encode({"userId": userId}, SECRET_KEY, algorithm="HS256")
+                finalData = {"status": 200, "userId": userId, "token": encoded_jwt}
             else:
                 finalData = {"status": 403, "msg": "You have entered an incorrect password."} 
         else:
@@ -34,7 +43,8 @@ class UserView(View):
             finalData = {"status": 403, "msg": "This user already exists"}
         else:
             user = User.objects.create(name=body["name"], email=body["email"], phone=body["phone"], password=body["password"])
-            finalData = {"status": 200, "data": json.loads(serialize("json", [user]))}
+            encoded_jwt = jwt.encode({"userId": user.pk}, SECRET_KEY, algorithm="HS256")
+            finalData = {"status": 200, "data": json.loads(serialize("json", [user])), "token": encoded_jwt}
         return JsonResponse(finalData, safe=False)
     
     def delete(self, request):
@@ -51,12 +61,14 @@ class UserView(View):
 
 class TaskView(View):
     def post(self, request):
+        authCheck(request.headers["Authorization"])
         body = GetBody(request)
         task = Task.objects.create(name=body["name"], taskCycle=body["taskCycle"], dueDate=datetime.datetime.strptime(body["dueDate"], '%Y-%m-%d').date(), originalDate=datetime.datetime.strptime(body["dueDate"], '%Y-%m-%d').date(), userId=User.objects.get(id__exact=body["userId"]))
         finalData = json.loads(serialize("json", [task]))
         return JsonResponse(finalData, safe=False)
 
     def delete(self, request):
+        authCheck(request.headers["Authorization"])
         id = request.GET.get('id', '')
         user = request.GET.get('user', '')
         task = Task.objects.get(id=id)
@@ -66,6 +78,7 @@ class TaskView(View):
         return JsonResponse(finalData, safe=False)
 
     def put(self, request):
+        authCheck(request.headers["Authorization"])
         body = GetBody(request)
         id = request.GET.get('id', '')
         user = request.GET.get('user', '')
@@ -76,6 +89,7 @@ class TaskView(View):
 
 class EventView(View):
     def post(self, request):
+        authCheck(request.headers["Authorization"])
         body = GetBody(request)
         startDate = datetime.datetime.strptime(body["startDate"], '%Y-%m-%d %H:%M').date()
         endDate = datetime.datetime.strptime(body["endDate"], '%Y-%m-%d %H:%M').date()
@@ -105,6 +119,7 @@ class EventView(View):
         return JsonResponse(finalData, safe=False)
 
     def delete(self, request):
+        authCheck(request.headers["Authorization"])
         id = request.GET.get('id', '')
         user = request.GET.get('user', '')
         event = Event.objects.get(id=id)
@@ -114,6 +129,7 @@ class EventView(View):
         return JsonResponse(finalData, safe=False)
 
     def put(self, request):
+        authCheck(request.headers["Authorization"])
         body = GetBody(request)
         id = request.GET.get('id', '')
         user = request.GET.get('user', '')
@@ -125,6 +141,7 @@ class EventView(View):
 
 class UserViewGet(View):
     def get(self, request, id):
+        authCheck(request.headers["Authorization"])
         tasks = Task.objects.filter(userId__exact=id)
         events = Event.objects.filter(userId__exact=id)
         serialTasks = json.loads(serialize("json", tasks))
@@ -134,6 +151,7 @@ class UserViewGet(View):
 
 class SchedulerView(View):
     def get(self, request):
+        authCheck(request.headers["Authorization"])
         today = datetime.datetime.today()
         tomorrow = today + datetime.timedelta(days=1)
         tasks = Task.objects.filter(dueDate=today.strftime('%Y-%m-%d'), isComplete=False, taskCycle__day=True)
