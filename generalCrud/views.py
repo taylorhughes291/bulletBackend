@@ -137,3 +137,5 @@ class SchedulerView(View):
         today = datetime.datetime.today()
         tomorrow = today + datetime.timedelta(days=1)
         Task.objects.filter(dueDate=today.strftime('%Y-%m-%d'), isComplete=False, taskCycle__day=True).update(dueDate=tomorrow.strftime('%Y-%m-%d'))
+        response = {"status": 200}
+        return JsonResponse(response, safe=False)
