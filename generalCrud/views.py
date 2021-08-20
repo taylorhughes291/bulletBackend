@@ -163,7 +163,6 @@ class UserViewGet(View):
 class SchedulerView(View):
     def get(self, request):
         tomorrow = today + datetime.timedelta(days=1)
-        print(today)
         tasks = Task.objects.filter(dueDate=today.strftime('%Y-%m-%d'), isComplete=False, taskCycle__day=True)
         
         newTasks = map(lambda n: createNewTask(n, timeInterval=tomorrow), tasks)
