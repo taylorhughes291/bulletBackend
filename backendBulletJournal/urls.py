@@ -15,7 +15,7 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
-from generalCrud.views import UserView, TaskView, EventView, UserViewGet, SchedulerView
+from generalCrud.views import UserView, TaskView, EventView, UserViewGet, SchedulerView, SchedulerWeekView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -23,5 +23,6 @@ urlpatterns = [
     path('task/', TaskView.as_view()),
     path('event/', EventView.as_view()),
     path('user/<id>/', UserViewGet.as_view()),
-    path('scheduler/', SchedulerView.as_view())
+    path('scheduler/day/', SchedulerView.as_view()),
+    path('scheduler/week/', SchedulerWeekView.as_view()),
 ]

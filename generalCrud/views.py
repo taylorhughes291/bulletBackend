@@ -9,14 +9,25 @@ from .models import User
 from .models import Task
 from .models import Event
 import datetime
+from pytz import timezone
 import jwt
+
+today = datetime.datetime.today() - datetime.timedelta(hours=7)
 
 # Auth Check
 def authCheck (token):
     accessToken = token.split()[1]
-    print(accessToken)
     decoded = jwt.decode(accessToken, SECRET_KEY, algorithms="HS256")
 
+def createNewTask(obj, timeInterval):
+    return Task(
+        name=obj.name,
+        taskCycle=obj.taskCycle,
+        dueDate=timeInterval.date(),
+        userId=obj.userId,
+        originalDate=obj.originalDate,
+        isComplete=obj.isComplete
+    )
 
 # Create your views here.
 class UserView(View):
@@ -151,22 +162,23 @@ class UserViewGet(View):
 
 class SchedulerView(View):
     def get(self, request):
-        authCheck(request.headers["Authorization"])
-        today = datetime.datetime.today()
         tomorrow = today + datetime.timedelta(days=1)
         tasks = Task.objects.filter(dueDate=today.strftime('%Y-%m-%d'), isComplete=False, taskCycle__day=True)
         
-        def createNewTask(obj):
-            return Task(
-                name=obj.name,
-                taskCycle=obj.taskCycle,
-                dueDate=tomorrow.date(),
-                userId=obj.userId,
-                originalDate=obj.originalDate,
-                isComplete=obj.isComplete
-            )
+        newTasks = map(lambda n: createNewTask(n, timeInterval=tomorrow), tasks)
+        createTasks = Task.objects.bulk_create(newTasks)
+        serialTasks = json.loads(serialize("json", createTasks))
+        response = {"status": 200, "tasks": serialTasks}
+        return JsonResponse(response, safe=False)
+
+class SchedulerWeekView(View):
+    def get(self, request):
+        startOfWeek = today - datetime.timedelta(days=today.weekday())
+        endOfWeek = startOfWeek + datetime.timedelta(days=6)
+        nextWeek = today + datetime.timedelta(days=7)
+        tasks = Task.objects.filter(dueDate__gte=startOfWeek, dueDate__lte=endOfWeek, isComplete=False, taskCycle__week=True)
         
-        newTasks = map(createNewTask, tasks)
+        newTasks = map(lambda n: createNewTask(n, timeInterval=nextWeek), tasks)
         createTasks = Task.objects.bulk_create(newTasks)
         serialTasks = json.loads(serialize("json", createTasks))
         response = {"status": 200, "tasks": serialTasks}
